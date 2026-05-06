@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Greece 2026">
+<meta name="theme-color" content="#0a2a45">
+<title>Greece with Travel Buddies 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;family=Montserrat:wght@300;400;600&amp;display=swap" rel="stylesheet">
+<style>
+  :root { --sky:#1a6fa8; --sea:#0d4f7a; --white:#f9f6f0; --terracotta:#c45c3a; --olive:#6b7c4e; --navy:#0a2a45; --gold:#c9a84c; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Montserrat',sans-serif; background:var(--white); color:var(--navy); min-height:100vh; }
+  header { background:linear-gradient(135deg,var(--sea) 0%,var(--sky) 60%,#5ba3d0 100%); color:white; padding:36px 40px 28px; position:relative; overflow:hidden; border-bottom:5px solid var(--gold); }
+  header::before { content:''; position:absolute; bottom:-30px; left:-10px; right:-10px; height:60px; background:var(--white); border-radius:50% 50% 0 0/100% 100% 0 0; }
+  header .sun { position:absolute; top:-30px; right:60px; width:120px; height:120px; border-radius:50%; background:radial-gradient(circle,#ffe87c,#f5a623); box-shadow:0 0 40px 15px rgba(245,166,35,0.3); opacity:0.7; }
+  header .wave { position:absolute; bottom:25px; left:0; width:100%; height:30px; opacity:0.2; background:repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(255,255,255,0.6) 40px,rgba(255,255,255,0.6) 80px); }
+  header h1 { font-family:'Playfair Display',serif; font-size:2.4rem; font-weight:700; letter-spacing:1px; position:relative; z-index:1; text-shadow:0 2px 8px rgba(0,0,0,0.3); }
+  header .subtitle { font-size:0.85rem; font-weight:300; letter-spacing:4px; text-transform:uppercase; margin-top:6px; opacity:0.9; position:relative; z-index:1; }
+  header .flags { font-size:2rem; position:relative; z-index:1; margin-top:6px; letter-spacing:4px; }
+  .tab-bar { display:flex; background:var(--navy); position:sticky; top:0; z-index:100; overflow-x:auto; border-bottom:3px solid var(--gold); }
+  .tab-bar button { flex:none; padding:13px 20px; border:none; background:transparent; color:rgba(255,255,255,0.6); font-family:'Montserrat',sans-serif; font-size:0.78rem; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; cursor:pointer; transition:all 0.2s; border-bottom:3px solid transparent; margin-bottom:-3px; white-space:nowrap; }
+  .tab-bar button:hover { color:white; }
+  .tab-bar button.active { color:var(--gold); border-bottom-color:var(--gold); }
+  main { max-width:1100px; margin:0 auto; padding:40px 20px 100px; }
+  .tab-pane { display:none; }
+  .tab-pane.active { display:block; }
+  .section { margin-bottom:48px; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(10,42,69,0.10); }
+  .section-header { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:18px 28px; color:white; font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; }
+  .section-header .left { display:flex; align-items:center; gap:12px; }
+  .section-header .icon { font-size:1.6rem; }
+  .flights-out .section-header  { background:linear-gradient(90deg,#1a6fa8,#2e8bc0); }
+  .flights-back .section-header { background:linear-gradient(90deg,#0a2a45,#1a6fa8); }
+  .ferries .section-header      { background:linear-gradient(90deg,#0d6e6e,#17a2b8); }
+  .hotels .section-header       { background:linear-gradient(90deg,#8b6914,#c9a84c); }
+  .extra-flight .section-header { background:linear-gradient(90deg,#5a3a8a,#7e57c2); }
+  .btn-add-more { background:rgba(255,255,255,0.2); color:white; border:2px solid rgba(255,255,255,0.5); border-radius:20px; padding:6px 16px; font-family:'Montserrat',sans-serif; font-size:0.72rem; font-weight:600; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+  .btn-add-more:hover { background:rgba(255,255,255,0.35); }
+  .table-wrap { overflow-x:auto; background:white; }
+  table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+  thead tr { background:#f0f4f8; }
+  thead th { padding:12px 14px; text-align:left; font-weight:600; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.8px; color:#5a6a7a; border-bottom:2px solid #dde4ec; white-space:nowrap; }
+  tbody tr { border-bottom:1px solid #eef1f5; transition:background 0.15s; }
+  tbody tr:hover { background:#f7fbff; }
+  td { padding:0; vertical-align:top; }
+  td input, td textarea { width:100%; border:none; background:transparent; font-family:'Montserrat',sans-serif; font-size:0.82rem; color:var(--navy); padding:12px 14px; resize:none; outline:none; transition:background 0.15s; }
+  td input[type="date"], td input[type="time"] { cursor:pointer; min-width:160px; }
+  td input:focus, td textarea:focus { background:#e8f4fd; border-radius:4px; }
+  td textarea { min-height:52px; line-height:1.4; }
+  td.label-cell { padding:12px 14px; font-weight:600; color:#334; white-space:nowrap; background:rgba(0,0,0,0.015); border-right:1px solid #eef1f5; font-size:0.78rem; }
+  td.comment-cell input { background:#fffdf5; font-style:italic; color:#7a6a3a; }
+  td.comment-cell input:focus { background:#fff8dc; }
+  .toolbar { display:flex; gap:8px; justify-content:flex-end; margin-bottom:28px; flex-wrap:wrap; }
+  .btn { padding:9px 16px; border-radius:8px; border:none; cursor:pointer; font-family:'Montserrat',sans-serif; font-weight:600; font-size:0.78rem; letter-spacing:0.4px; transition:all 0.2s; }
+  .btn-clear  { background:white; color:var(--navy); border:1.5px solid #dde4ec; } .btn-clear:hover { background:#f0f4f8; }
+  .btn-save   { background:var(--olive); color:white; } .btn-save:hover { background:#556438; }
+  .btn-export { background:var(--gold); color:var(--navy); font-weight:700; } .btn-export:hover { background:#b8962a; }
+  .btn-print  { background:var(--sky); color:white; } .btn-print:hover { background:var(--sea); }
+  .btn-refresh{ background:var(--sky); color:white; border:none; border-radius:8px; padding:10px 22px; cursor:pointer; font-family:'Montserrat',sans-serif; font-weight:600; font-size:0.82rem; transition:all 0.2s; }
+  .btn-refresh:hover { background:var(--sea); }
+  .summary-intro { background:white; border-radius:12px; padding:20px 28px; margin-bottom:24px; box-shadow:0 2px 12px rgba(10,42,69,0.08); font-size:0.85rem; color:#556; line-height:1.6; }
+  .summary-intro strong { color:var(--navy); }
+  #summary-table { width:100%; border-collapse:collapse; font-size:0.82rem; background:white; border-radius:12px; overflow:hidden; box-shadow:0 4px 20px rgba(10,42,69,0.10); }
+  #summary-table thead tr { background:var(--navy); }
+  #summary-table thead th { padding:14px 16px; color:var(--gold); font-size:0.72rem; text-transform:uppercase; letter-spacing:1px; font-weight:700; text-align:left; }
+  #summary-table tbody tr { border-bottom:1px solid #eef1f5; }
+  #summary-table tbody tr:hover { background:#f0f7ff; }
+  #summary-table td { padding:11px 16px; vertical-align:middle; }
+  .type-badge { display:inline-block; padding:3px 10px; border-radius:12px; font-size:0.68rem; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; }
+  .badge-flight { background:#dbeafe; color:#1e40af; }
+  .badge-ferry  { background:#d1fae5; color:#065f46; }
+  .badge-hotel  { background:#fef3c7; color:#92400e; }
+  .summary-empty { text-align:center; padding:48px; color:#aaa; font-style:italic; }
+  #autosave-bar { position:fixed; bottom:0; left:0; right:0; z-index:200; background:var(--navy); color:rgba(255,255,255,0.8); font-family:'Montserrat',sans-serif; font-size:0.72rem; font-weight:600; padding:8px 16px; display:flex; align-items:center; justify-content:space-between; border-top:2px solid var(--gold); }
+  #autosave-bar .asleft { display:flex; align-items:center; gap:8px; }
+  #autosave-dot { width:8px; height:8px; border-radius:50%; background:#aaa; flex-shrink:0; transition:background 0.4s; }
+  #autosave-dot.saved  { background:#4caf50; box-shadow:0 0 6px #4caf50; }
+  #autosave-dot.saving { background:var(--gold); }
+  #autosave-dot.error  { background:#e53935; }
+  footer { text-align:center; padding:20px; font-size:0.72rem; color:#8a9aaa; letter-spacing:1px; text-transform:uppercase; border-top:1px solid #dde4ec; }
+  @media print {
+    .tab-bar,.toolbar,#autosave-bar,footer,header::before,header .sun,header .wave { display:none !important; }
+    .tab-pane { display:block !important; }
+    body { background:white; }
+    .section { box-shadow:none; border:1px solid #ccc; page-break-inside:avoid; }
+    .section-header { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="sun"></div><div class="wave"></div>
+  <div class="flags">🇬🇧 🇺🇸 ✈️ 🇬🇷</div>
+  <h1>Greece with Travel Buddies 2026</h1>
+  <div class="subtitle">UK &amp; USA Friends — Full Trip Itinerary &amp; Booking Details</div>
+</header>
+<nav class="tab-bar">
+  <button class="" onclick="showTab('flights',this)">✈️ Flights</button>
+  <button onclick="showTab('ferries',this)">⛴️ Ferries</button>
+  <button onclick="showTab('hotels',this)" class="active">🏨 Hotels</button>
+  <button onclick="showTab('summary',this)">📋 Trip Summary</button>
+</nav>
+<main>
+  <div class="toolbar">
+    <button class="btn btn-clear" onclick="clearAll()">🗑 Clear All</button>
+    <button class="btn btn-save" onclick="saveData()">💾 Save</button>
+    <button class="btn btn-export" onclick="exportWithData()">📤 Share</button>
+    <button class="btn btn-print" onclick="window.print()">🖨 Print</button>
+  </div>
+
+  <!-- FLIGHTS -->
+  <div id="tab-flights" class="tab-pane" style="display: none;">
+    <div class="section flights-out">
+      <div class="section-header"><div class="left"><span class="icon">✈️</span>Outbound Flight — London Heathrow (LHR) to Athens (ATH)</div></div>
+      <div class="table-wrap"><table><thead><tr><th>Field</th><th>Details</th><th>Comments</th></tr></thead><tbody>
+        <tr><td class="label-cell">Departure Date</td><td><input type="date" id="of-dep-date"></td><td class="comment-cell"><input id="of-dep-date-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Departure Airport</td><td><input id="of-dep-apt"></td><td class="comment-cell"><input id="of-dep-apt-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Departure Terminal</td><td><input id="of-dep-term" placeholder="e.g. Terminal 2"></td><td class="comment-cell"><input id="of-dep-term-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Departure Time</td><td><input type="time" id="of-dep-time"></td><td class="comment-cell"><input id="of-dep-time-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Flight Number</td><td><input id="of-flt-no" placeholder="e.g. BA636"></td><td class="comment-cell"><input id="of-flt-no-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Airline</td><td><input id="of-airline" placeholder="e.g. British Airways"></td><td class="comment-cell"><input id="of-airline-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Arrival Airport</td><td><input id="of-arr-apt"></td><td class="comment-cell"><input id="of-arr-apt-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Arrival Time</td><td><input type="time" id="of-arr-time"></td><td class="comment-cell"><input id="of-arr-time-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Booking Reference</td><td><input id="of-ref" placeholder="e.g. ABC123"></td><td class="comment-cell"><input id="of-ref-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Booked With</td><td><input id="of-bookedwith" placeholder="e.g. British Airways"></td><td class="comment-cell"><input id="of-bookedwith-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Seat Numbers</td><td><input id="of-seats" placeholder="e.g. 22A, 22B"></td><td class="comment-cell"><input id="of-seats-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Luggage Allowance</td><td><input id="of-luggage" placeholder="e.g. 23kg hold + 10kg cabin"></td><td class="comment-cell"><input id="of-luggage-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Check-in Opens</td><td><input id="of-checkin" placeholder="e.g. Online 24hrs before"></td><td class="comment-cell"><input id="of-checkin-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Notes</td><td><textarea id="of-notes" placeholder="Any additional notes…"></textarea></td><td class="comment-cell"><input id="of-notes-c" placeholder="Comment…"></td></tr>
+      </tbody></table></div>
+    </div>
+    <div class="section flights-back">
+      <div class="section-header"><div class="left"><span class="icon">✈️</span>Return Flight — Athens (ATH) to London Heathrow (LHR)</div></div>
+      <div class="table-wrap"><table><thead><tr><th>Field</th><th>Details</th><th>Comments</th></tr></thead><tbody>
+        <tr><td class="label-cell">Departure Date</td><td><input type="date" id="rf-dep-date"></td><td class="comment-cell"><input id="rf-dep-date-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Departure Airport</td><td><input id="rf-dep-apt"></td><td class="comment-cell"><input id="rf-dep-apt-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Departure Terminal</td><td><input id="rf-dep-term" placeholder="e.g. Terminal 1"></td><td class="comment-cell"><input id="rf-dep-term-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Departure Time</td><td><input type="time" id="rf-dep-time"></td><td class="comment-cell"><input id="rf-dep-time-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Flight Number</td><td><input id="rf-flt-no" placeholder="e.g. BA637"></td><td class="comment-cell"><input id="rf-flt-no-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Airline</td><td><input id="rf-airline" placeholder="e.g. British Airways"></td><td class="comment-cell"><input id="rf-airline-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Arrival Airport</td><td><input id="rf-arr-apt"></td><td class="comment-cell"><input id="rf-arr-apt-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Arrival Time</td><td><input type="time" id="rf-arr-time"></td><td class="comment-cell"><input id="rf-arr-time-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Booking Reference</td><td><input id="rf-ref" placeholder="e.g. XYZ789"></td><td class="comment-cell"><input id="rf-ref-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Booked With</td><td><input id="rf-bookedwith" placeholder="e.g. British Airways"></td><td class="comment-cell"><input id="rf-bookedwith-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Seat Numbers</td><td><input id="rf-seats" placeholder="e.g. 18C, 18D"></td><td class="comment-cell"><input id="rf-seats-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Luggage Allowance</td><td><input id="rf-luggage" placeholder="e.g. 23kg hold + 10kg cabin"></td><td class="comment-cell"><input id="rf-luggage-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Check-in Opens</td><td><input id="rf-checkin" placeholder="e.g. Online 24hrs before"></td><td class="comment-cell"><input id="rf-checkin-c" placeholder="Comment…"></td></tr>
+        <tr><td class="label-cell">Notes</td><td><textarea id="rf-notes" placeholder="Any additional notes…"></textarea></td><td class="comment-cell"><input id="rf-notes-c" placeholder="Comment…"></td></tr>
+      </tbody></table></div>
+    </div>
+    <div id="extra-flights-container"></div>
+    <div style="text-align:center;margin-bottom:32px;">
+      <button class="btn btn-clear" style="padding:12px 28px;font-size:0.85rem;" onclick="addExtraFlight()">➕ Add Another Flight</button>
+    </div>
+  </div>
+
+  <!-- FERRIES -->
+  <div id="tab-ferries" class="tab-pane" style="display: none;">
+    <div class="section ferries">
+      <div class="section-header">
+        <div class="left" id="ferry-header-text"><span class="icon">⛴️</span>Ferry Crossings (4)</div>
+        <button class="btn-add-more" onclick="addFerry()">➕ Add Ferry</button>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>Field</th><th>Details</th><th>Comments</th></tr></thead>
+        <tbody id="ferry-rows"><tr style="background: rgb(224, 245, 245);"><td colspan="4" style="padding:10px 16px;font-weight:700;font-size:0.78rem;letter-spacing:1px;color:#0d6e6e;text-transform:uppercase;">⛴ Ferry 1</td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Date</td><td><input type="date" id="fy1-date"></td><td class="comment-cell"><input id="fy1-date-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Departure Time</td><td><input type="time" id="fy1-dep-time"></td><td class="comment-cell"><input id="fy1-dep-time-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Port of Departure</td><td><input id="fy1-port-from" placeholder="e.g. Piraeus, Athens"></td><td class="comment-cell"><input id="fy1-port-from-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Port of Arrival</td><td><input id="fy1-port-to" placeholder="e.g. Heraklion, Crete"></td><td class="comment-cell"><input id="fy1-port-to-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Arrival Time (approx)</td><td><input type="time" id="fy1-arr-time"></td><td class="comment-cell"><input id="fy1-arr-time-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Ferry Company</td><td><input id="fy1-company" placeholder="e.g. Minoan Lines"></td><td class="comment-cell"><input id="fy1-company-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Vessel Name</td><td><input id="fy1-vessel" placeholder="e.g. Knossos Palace"></td><td class="comment-cell"><input id="fy1-vessel-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Ticket Type / Cabin</td><td><input id="fy1-ticket-type" placeholder="e.g. Deck passage / Cabin for 3"></td><td class="comment-cell"><input id="fy1-ticket-type-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Booking Reference</td><td><input id="fy1-ref" placeholder="e.g. FER2026-001"></td><td class="comment-cell"><input id="fy1-ref-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Booked With</td><td><input id="fy1-booked" placeholder="e.g. Ferryhopper / Direct"></td><td class="comment-cell"><input id="fy1-booked-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Notes</td><td><textarea id="fy1-notes" placeholder="Any additional notes…"></textarea></td><td class="comment-cell"><input id="fy1-notes-c" placeholder="Comment…"></td></tr><tr style="background: rgb(224, 245, 245);"><td colspan="4" style="padding:10px 16px;font-weight:700;font-size:0.78rem;letter-spacing:1px;color:#0d6e6e;text-transform:uppercase;">⛴ Ferry 2</td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Date</td><td><input type="date" id="fy2-date"></td><td class="comment-cell"><input id="fy2-date-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Departure Time</td><td><input type="time" id="fy2-dep-time"></td><td class="comment-cell"><input id="fy2-dep-time-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Port of Departure</td><td><input id="fy2-port-from" placeholder="e.g. Piraeus, Athens"></td><td class="comment-cell"><input id="fy2-port-from-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Port of Arrival</td><td><input id="fy2-port-to" placeholder="e.g. Heraklion, Crete"></td><td class="comment-cell"><input id="fy2-port-to-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Arrival Time (approx)</td><td><input type="time" id="fy2-arr-time"></td><td class="comment-cell"><input id="fy2-arr-time-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Ferry Company</td><td><input id="fy2-company" placeholder="e.g. Minoan Lines"></td><td class="comment-cell"><input id="fy2-company-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Vessel Name</td><td><input id="fy2-vessel" placeholder="e.g. Knossos Palace"></td><td class="comment-cell"><input id="fy2-vessel-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Ticket Type / Cabin</td><td><input id="fy2-ticket-type" placeholder="e.g. Deck passage / Cabin for 3"></td><td class="comment-cell"><input id="fy2-ticket-type-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Booking Reference</td><td><input id="fy2-ref" placeholder="e.g. FER2026-001"></td><td class="comment-cell"><input id="fy2-ref-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Booked With</td><td><input id="fy2-booked" placeholder="e.g. Ferryhopper / Direct"></td><td class="comment-cell"><input id="fy2-booked-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Notes</td><td><textarea id="fy2-notes" placeholder="Any additional notes…"></textarea></td><td class="comment-cell"><input id="fy2-notes-c" placeholder="Comment…"></td></tr><tr style="background: rgb(224, 245, 245);"><td colspan="4" style="padding:10px 16px;font-weight:700;font-size:0.78rem;letter-spacing:1px;color:#0d6e6e;text-transform:uppercase;">⛴ Ferry 3</td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Date</td><td><input type="date" id="fy3-date"></td><td class="comment-cell"><input id="fy3-date-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Departure Time</td><td><input type="time" id="fy3-dep-time"></td><td class="comment-cell"><input id="fy3-dep-time-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Port of Departure</td><td><input id="fy3-port-from" placeholder="e.g. Piraeus, Athens"></td><td class="comment-cell"><input id="fy3-port-from-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Port of Arrival</td><td><input id="fy3-port-to" placeholder="e.g. Heraklion, Crete"></td><td class="comment-cell"><input id="fy3-port-to-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Arrival Time (approx)</td><td><input type="time" id="fy3-arr-time"></td><td class="comment-cell"><input id="fy3-arr-time-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Ferry Company</td><td><input id="fy3-company" placeholder="e.g. Minoan Lines"></td><td class="comment-cell"><input id="fy3-company-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Vessel Name</td><td><input id="fy3-vessel" placeholder="e.g. Knossos Palace"></td><td class="comment-cell"><input id="fy3-vessel-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Ticket Type / Cabin</td><td><input id="fy3-ticket-type" placeholder="e.g. Deck passage / Cabin for 3"></td><td class="comment-cell"><input id="fy3-ticket-type-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Booking Reference</td><td><input id="fy3-ref" placeholder="e.g. FER2026-001"></td><td class="comment-cell"><input id="fy3-ref-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Booked With</td><td><input id="fy3-booked" placeholder="e.g. Ferryhopper / Direct"></td><td class="comment-cell"><input id="fy3-booked-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Notes</td><td><textarea id="fy3-notes" placeholder="Any additional notes…"></textarea></td><td class="comment-cell"><input id="fy3-notes-c" placeholder="Comment…"></td></tr><tr style="background: rgb(224, 245, 245);"><td colspan="4" style="padding:10px 16px;font-weight:700;font-size:0.78rem;letter-spacing:1px;color:#0d6e6e;text-transform:uppercase;">⛴ Ferry 4</td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Date</td><td><input type="date" id="fy4-date"></td><td class="comment-cell"><input id="fy4-date-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Departure Time</td><td><input type="time" id="fy4-dep-time"></td><td class="comment-cell"><input id="fy4-dep-time-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Port of Departure</td><td><input id="fy4-port-from" placeholder="e.g. Piraeus, Athens"></td><td class="comment-cell"><input id="fy4-port-from-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Port of Arrival</td><td><input id="fy4-port-to" placeholder="e.g. Heraklion, Crete"></td><td class="comment-cell"><input id="fy4-port-to-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Arrival Time (approx)</td><td><input type="time" id="fy4-arr-time"></td><td class="comment-cell"><input id="fy4-arr-time-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Ferry Company</td><td><input id="fy4-company" placeholder="e.g. Minoan Lines"></td><td class="comment-cell"><input id="fy4-company-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Vessel Name</td><td><input id="fy4-vessel" placeholder="e.g. Knossos Palace"></td><td class="comment-cell"><input id="fy4-vessel-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Ticket Type / Cabin</td><td><input id="fy4-ticket-type" placeholder="e.g. Deck passage / Cabin for 3"></td><td class="comment-cell"><input id="fy4-ticket-type-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Booking Reference</td><td><input id="fy4-ref" placeholder="e.g. FER2026-001"></td><td class="comment-cell"><input id="fy4-ref-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Booked With</td><td><input id="fy4-booked" placeholder="e.g. Ferryhopper / Direct"></td><td class="comment-cell"><input id="fy4-booked-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Notes</td><td><textarea id="fy4-notes" placeholder="Any additional notes…"></textarea></td><td class="comment-cell"><input id="fy4-notes-c" placeholder="Comment…"></td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- HOTELS -->
+  <div id="tab-hotels" class="tab-pane active" style="display: block;">
+    <div class="section hotels">
+      <div class="section-header">
+        <div class="left" id="hotel-header-text"><span class="icon">🏨</span>Hotel Accommodation (5)</div>
+        <button class="btn-add-more" onclick="addHotel()">➕ Add Hotel</button>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>Field</th><th>Details</th><th>Comments</th></tr></thead>
+        <tbody id="hotel-rows"><tr style="background: rgb(255, 243, 205);"><td colspan="4" style="padding:10px 16px;font-weight:700;font-size:0.78rem;letter-spacing:1px;color:#8b6914;text-transform:uppercase;">🏨 Hotel 1</td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Hotel Name</td><td><input id="ht1-name" placeholder="e.g. Hotel Electra, Athens"></td><td class="comment-cell"><input id="ht1-name-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Location / Town</td><td><input id="ht1-location" placeholder="e.g. Plaka, Athens"></td><td class="comment-cell"><input id="ht1-location-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Check-in Date</td><td><input type="date" id="ht1-checkin"></td><td class="comment-cell"><input id="ht1-checkin-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Check-out Date</td><td><input type="date" id="ht1-checkout"></td><td class="comment-cell"><input id="ht1-checkout-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Number of Nights</td><td><input id="ht1-nights" placeholder="e.g. 2"></td><td class="comment-cell"><input id="ht1-nights-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Breakfast Included</td><td><select id="ht1-breakfast" style="width:100%;border:none;background:transparent;font-family:Montserrat,sans-serif;font-size:0.82rem;color:#0a2a45;padding:12px 14px;outline:none;cursor:pointer;"><option>— Select —</option><option>Yes</option><option>No</option></select></td><td class="comment-cell"><input id="ht1-breakfast-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Room Type</td><td><input id="ht1-room" placeholder="e.g. Triple room / Sea view"></td><td class="comment-cell"><input id="ht1-room-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Number of Guests</td><td><input id="ht1-guests" placeholder="e.g. 3"></td><td class="comment-cell"><input id="ht1-guests-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Booking Reference</td><td><input id="ht1-ref" placeholder="e.g. HTL2026-001"></td><td class="comment-cell"><input id="ht1-ref-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Booked With</td><td><input id="ht1-booked" placeholder="e.g. Booking.com / Hotel Direct"></td><td class="comment-cell"><input id="ht1-booked-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Notes</td><td><textarea id="ht1-notes" placeholder="Any additional notes…"></textarea></td><td class="comment-cell"><input id="ht1-notes-c" placeholder="Comment…"></td></tr><tr style="background: rgb(255, 243, 205);"><td colspan="4" style="padding:10px 16px;font-weight:700;font-size:0.78rem;letter-spacing:1px;color:#8b6914;text-transform:uppercase;">🏨 Hotel 2</td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Hotel Name</td><td><input id="ht2-name" placeholder="e.g. Hotel Electra, Athens"></td><td class="comment-cell"><input id="ht2-name-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Location / Town</td><td><input id="ht2-location" placeholder="e.g. Plaka, Athens"></td><td class="comment-cell"><input id="ht2-location-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Check-in Date</td><td><input type="date" id="ht2-checkin"></td><td class="comment-cell"><input id="ht2-checkin-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Check-out Date</td><td><input type="date" id="ht2-checkout"></td><td class="comment-cell"><input id="ht2-checkout-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Number of Nights</td><td><input id="ht2-nights" placeholder="e.g. 2"></td><td class="comment-cell"><input id="ht2-nights-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Breakfast Included</td><td><select id="ht2-breakfast" style="width:100%;border:none;background:transparent;font-family:Montserrat,sans-serif;font-size:0.82rem;color:#0a2a45;padding:12px 14px;outline:none;cursor:pointer;"><option>— Select —</option><option>Yes</option><option>No</option></select></td><td class="comment-cell"><input id="ht2-breakfast-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Room Type</td><td><input id="ht2-room" placeholder="e.g. Triple room / Sea view"></td><td class="comment-cell"><input id="ht2-room-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Number of Guests</td><td><input id="ht2-guests" placeholder="e.g. 3"></td><td class="comment-cell"><input id="ht2-guests-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Booking Reference</td><td><input id="ht2-ref" placeholder="e.g. HTL2026-001"></td><td class="comment-cell"><input id="ht2-ref-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Booked With</td><td><input id="ht2-booked" placeholder="e.g. Booking.com / Hotel Direct"></td><td class="comment-cell"><input id="ht2-booked-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Notes</td><td><textarea id="ht2-notes" placeholder="Any additional notes…"></textarea></td><td class="comment-cell"><input id="ht2-notes-c" placeholder="Comment…"></td></tr><tr style="background: rgb(255, 243, 205);"><td colspan="4" style="padding:10px 16px;font-weight:700;font-size:0.78rem;letter-spacing:1px;color:#8b6914;text-transform:uppercase;">🏨 Hotel 3</td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Hotel Name</td><td><input id="ht3-name" placeholder="e.g. Hotel Electra, Athens"></td><td class="comment-cell"><input id="ht3-name-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Location / Town</td><td><input id="ht3-location" placeholder="e.g. Plaka, Athens"></td><td class="comment-cell"><input id="ht3-location-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Check-in Date</td><td><input type="date" id="ht3-checkin"></td><td class="comment-cell"><input id="ht3-checkin-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Check-out Date</td><td><input type="date" id="ht3-checkout"></td><td class="comment-cell"><input id="ht3-checkout-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Number of Nights</td><td><input id="ht3-nights" placeholder="e.g. 2"></td><td class="comment-cell"><input id="ht3-nights-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Breakfast Included</td><td><select id="ht3-breakfast" style="width:100%;border:none;background:transparent;font-family:Montserrat,sans-serif;font-size:0.82rem;color:#0a2a45;padding:12px 14px;outline:none;cursor:pointer;"><option>— Select —</option><option>Yes</option><option>No</option></select></td><td class="comment-cell"><input id="ht3-breakfast-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Room Type</td><td><input id="ht3-room" placeholder="e.g. Triple room / Sea view"></td><td class="comment-cell"><input id="ht3-room-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Number of Guests</td><td><input id="ht3-guests" placeholder="e.g. 3"></td><td class="comment-cell"><input id="ht3-guests-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Booking Reference</td><td><input id="ht3-ref" placeholder="e.g. HTL2026-001"></td><td class="comment-cell"><input id="ht3-ref-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Booked With</td><td><input id="ht3-booked" placeholder="e.g. Booking.com / Hotel Direct"></td><td class="comment-cell"><input id="ht3-booked-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Notes</td><td><textarea id="ht3-notes" placeholder="Any additional notes…"></textarea></td><td class="comment-cell"><input id="ht3-notes-c" placeholder="Comment…"></td></tr><tr style="background: rgb(255, 243, 205);"><td colspan="4" style="padding:10px 16px;font-weight:700;font-size:0.78rem;letter-spacing:1px;color:#8b6914;text-transform:uppercase;">🏨 Hotel 4</td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Hotel Name</td><td><input id="ht4-name" placeholder="e.g. Hotel Electra, Athens"></td><td class="comment-cell"><input id="ht4-name-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Location / Town</td><td><input id="ht4-location" placeholder="e.g. Plaka, Athens"></td><td class="comment-cell"><input id="ht4-location-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Check-in Date</td><td><input type="date" id="ht4-checkin"></td><td class="comment-cell"><input id="ht4-checkin-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Check-out Date</td><td><input type="date" id="ht4-checkout"></td><td class="comment-cell"><input id="ht4-checkout-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Number of Nights</td><td><input id="ht4-nights" placeholder="e.g. 2"></td><td class="comment-cell"><input id="ht4-nights-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Breakfast Included</td><td><select id="ht4-breakfast" style="width:100%;border:none;background:transparent;font-family:Montserrat,sans-serif;font-size:0.82rem;color:#0a2a45;padding:12px 14px;outline:none;cursor:pointer;"><option>— Select —</option><option>Yes</option><option>No</option></select></td><td class="comment-cell"><input id="ht4-breakfast-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Room Type</td><td><input id="ht4-room" placeholder="e.g. Triple room / Sea view"></td><td class="comment-cell"><input id="ht4-room-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Number of Guests</td><td><input id="ht4-guests" placeholder="e.g. 3"></td><td class="comment-cell"><input id="ht4-guests-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Booking Reference</td><td><input id="ht4-ref" placeholder="e.g. HTL2026-001"></td><td class="comment-cell"><input id="ht4-ref-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Booked With</td><td><input id="ht4-booked" placeholder="e.g. Booking.com / Hotel Direct"></td><td class="comment-cell"><input id="ht4-booked-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Notes</td><td><textarea id="ht4-notes" placeholder="Any additional notes…"></textarea></td><td class="comment-cell"><input id="ht4-notes-c" placeholder="Comment…"></td></tr><tr style="background: rgb(255, 243, 205);"><td colspan="4" style="padding:10px 16px;font-weight:700;font-size:0.78rem;letter-spacing:1px;color:#8b6914;text-transform:uppercase;">🏨 Hotel 5</td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Hotel Name</td><td><input id="ht5-name" placeholder="e.g. Hotel Electra, Athens"></td><td class="comment-cell"><input id="ht5-name-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Location / Town</td><td><input id="ht5-location" placeholder="e.g. Plaka, Athens"></td><td class="comment-cell"><input id="ht5-location-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Check-in Date</td><td><input type="date" id="ht5-checkin"></td><td class="comment-cell"><input id="ht5-checkin-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Check-out Date</td><td><input type="date" id="ht5-checkout"></td><td class="comment-cell"><input id="ht5-checkout-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Number of Nights</td><td><input id="ht5-nights" placeholder="e.g. 2"></td><td class="comment-cell"><input id="ht5-nights-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Breakfast Included</td><td><select id="ht5-breakfast" style="width:100%;border:none;background:transparent;font-family:Montserrat,sans-serif;font-size:0.82rem;color:#0a2a45;padding:12px 14px;outline:none;cursor:pointer;"><option>— Select —</option><option>Yes</option><option>No</option></select></td><td class="comment-cell"><input id="ht5-breakfast-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Room Type</td><td><input id="ht5-room" placeholder="e.g. Triple room / Sea view"></td><td class="comment-cell"><input id="ht5-room-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Number of Guests</td><td><input id="ht5-guests" placeholder="e.g. 3"></td><td class="comment-cell"><input id="ht5-guests-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Booking Reference</td><td><input id="ht5-ref" placeholder="e.g. HTL2026-001"></td><td class="comment-cell"><input id="ht5-ref-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Booked With</td><td><input id="ht5-booked" placeholder="e.g. Booking.com / Hotel Direct"></td><td class="comment-cell"><input id="ht5-booked-c" placeholder="Comment…"></td></tr><tr><td style="padding:12px 14px;"></td><td class="label-cell">Notes</td><td><textarea id="ht5-notes" placeholder="Any additional notes…"></textarea></td><td class="comment-cell"><input id="ht5-notes-c" placeholder="Comment…"></td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div id="tab-summary" class="tab-pane" style="display: none;">
+    <div class="summary-intro">
+      <strong>📋 Chronological Trip Summary</strong><br>
+      All bookings sorted by date and time. Entries without a time appear last on their day.
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:18px;">
+      <button class="btn-refresh" onclick="buildSummary()">🔄 Refresh Summary</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table id="summary-table">
+        <thead><tr><th>Date</th><th>Time</th><th>Type</th><th>Description</th><th>Reference</th><th>Booked With</th><th>Notes</th></tr></thead>
+        <tbody id="summary-body"><tr><td colspan="7" class="summary-empty">Click "Refresh Summary" to build your itinerary.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+<footer>Greece with Travel Buddies 2026 &nbsp;·&nbsp; 🇬🇧 🇺🇸 Adventures in 🇬🇷 &nbsp;·&nbsp; Yamas! 🥂</footer>
+<div id="autosave-bar">
+  <div class="asleft"><div id="autosave-dot" class="saved"></div><span id="autosave-msg">Restored from auto-save</span></div>
+  <span id="autosave-time" style="opacity:0.6;font-size:0.68rem;">05/05/2026, 22:27:08</span>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// YOUR SAVED DATA — baked in directly
+// ═══════════════════════════════════════
+var BAKED_DATA = {"_ferryCount":4,"_hotelCount":5,"_extraFlightCount":0,"of-dep-date":"2026-05-21","of-dep-date-c":"","of-dep-apt":"London Heathrow (LHR)","of-dep-apt-c":"","of-dep-term":"","of-dep-term-c":"","of-dep-time":"12:15","of-dep-time-c":"","of-flt-no":"A3601","of-flt-no-c":"","of-airline":"Aegean","of-airline-c":"","of-arr-apt":"Athens International (ATH)","of-arr-apt-c":"","of-arr-time":"17:55","of-arr-time-c":"","of-ref":"9NPDHB","of-ref-c":"","of-bookedwith":"","of-bookedwith-c":"","of-seats":"","of-seats-c":"","of-luggage":"","of-luggage-c":"","of-checkin":"","of-checkin-c":"","of-notes":"","of-notes-c":"","rf-dep-date":"2026-06-02","rf-dep-date-c":"","rf-dep-apt":"Athens International (ATH)","rf-dep-apt-c":"","rf-dep-term":"","rf-dep-term-c":"","rf-dep-time":"13:30","rf-dep-time-c":"","rf-flt-no":"A3602","rf-flt-no-c":"","rf-airline":"Aegean","rf-airline-c":"","rf-arr-apt":"London Heathrow (LHR)","rf-arr-apt-c":"","rf-arr-time":"15:30","rf-arr-time-c":"","rf-ref":"9NPDHB","rf-ref-c":"","rf-bookedwith":"","rf-bookedwith-c":"","rf-seats":"","rf-seats-c":"","rf-luggage":"","rf-luggage-c":"","rf-checkin":"","rf-checkin-c":"","rf-notes":"","rf-notes-c":"","fy1-date":"2026-05-25","fy1-date-c":"","fy1-dep-time":"09:30","fy1-dep-time-c":"","fy1-port-from":"Piraeus","fy1-port-from-c":"","fy1-port-to":"Mykonos","fy1-port-to-c":"","fy1-arr-time":"12:10","fy1-arr-time-c":"","fy1-company":"","fy1-company-c":"","fy1-vessel":"","fy1-vessel-c":"","fy1-ticket-type":"","fy1-ticket-type-c":"","fy1-ref":"1112QRUSU ","fy1-ref-c":"","fy1-booked":"Seajet","fy1-booked-c":"","fy1-notes":"","fy1-notes-c":"","fy2-date":"2026-05-27","fy2-date-c":"","fy2-dep-time":"09:50","fy2-dep-time-c":"","fy2-port-from":"Mykonos","fy2-port-from-c":"","fy2-port-to":"Santorini","fy2-port-to-c":"","fy2-arr-time":"11:50","fy2-arr-time-c":"","fy2-company":"","fy2-company-c":"","fy2-vessel":"","fy2-vessel-c":"","fy2-ticket-type":"","fy2-ticket-type-c":"","fy2-ref":"1112QRUSU ","fy2-ref-c":"","fy2-booked":"Seajet","fy2-booked-c":"","fy2-notes":"","fy2-notes-c":"","fy3-date":"2026-05-30","fy3-date-c":"","fy3-dep-time":"09:50","fy3-dep-time-c":"","fy3-port-from":"Santorini","fy3-port-from-c":"","fy3-port-to":"Paros","fy3-port-to-c":"","fy3-arr-time":"11:35","fy3-arr-time-c":"","fy3-company":"","fy3-company-c":"","fy3-vessel":"","fy3-vessel-c":"","fy3-ticket-type":"","fy3-ticket-type-c":"","fy3-ref":"1112QRUSU ","fy3-ref-c":"","fy3-booked":"Seajet","fy3-booked-c":"","fy3-notes":"","fy3-notes-c":"","fy4-date":"2026-06-01","fy4-date-c":"","fy4-dep-time":"09:40","fy4-dep-time-c":"","fy4-port-from":"Paros","fy4-port-from-c":"","fy4-port-to":"Rafina, Athens","fy4-port-to-c":"","fy4-arr-time":"13:15","fy4-arr-time-c":"","fy4-company":"","fy4-company-c":"","fy4-vessel":"","fy4-vessel-c":"","fy4-ticket-type":"","fy4-ticket-type-c":"","fy4-ref":"1112QRUSU ","fy4-ref-c":"","fy4-booked":"Seajet","fy4-booked-c":"","fy4-notes":"","fy4-notes-c":"","ht1-name":"Acropolis Grid Athens","ht1-name-c":"","ht1-location":"Athens","ht1-location-c":"","ht1-checkin":"2026-05-21","ht1-checkin-c":"","ht1-checkout":"2026-05-25","ht1-checkout-c":"","ht1-nights":"","ht1-nights-c":"","ht1-breakfast":"Yes","ht1-breakfast-c":"","ht1-room":"","ht1-room-c":"","ht1-guests":"","ht1-guests-c":"","ht1-ref":"5126589892 pon 0616","ht1-ref-c":"","ht1-booked":"","ht1-booked-c":"","ht1-notes":"Approx 10 mins from Dan and Sherri, Browns Acropol in omonia square","ht1-notes-c":"","ht2-name":"Aelos Resort","ht2-name-c":"","ht2-location":"Mykonos","ht2-location-c":"","ht2-checkin":"2026-05-25","ht2-checkin-c":"","ht2-checkout":"2026-05-27","ht2-checkout-c":"","ht2-nights":"","ht2-nights-c":"","ht2-breakfast":"No","ht2-breakfast-c":"","ht2-room":"","ht2-room-c":"","ht2-guests":"","ht2-guests-c":"","ht2-ref":"5560573566. Pin 6278","ht2-ref-c":"","ht2-booked":"","ht2-booked-c":"","ht2-notes":"","ht2-notes-c":"","ht3-name":"Remezzo Vilas","ht3-name-c":"","ht3-location":"Santorini","ht3-location-c":"","ht3-checkin":"2026-05-27","ht3-checkin-c":"","ht3-checkout":"2026-05-30","ht3-checkout-c":"","ht3-nights":"","ht3-nights-c":"","ht3-breakfast":"Yes","ht3-breakfast-c":"","ht3-room":"","ht3-room-c":"","ht3-guests":"","ht3-guests-c":"","ht3-ref":"5457081286. Pin 9412","ht3-ref-c":"","ht3-booked":"","ht3-booked-c":"","ht3-notes":"10 min walk from Aeifos boutique hotel","ht3-notes-c":"","ht4-name":"Saint George Hotel","ht4-name-c":"","ht4-location":"Paros","ht4-location-c":"","ht4-checkin":"2026-05-30","ht4-checkin-c":"","ht4-checkout":"2026-06-01","ht4-checkout-c":"","ht4-nights":"","ht4-nights-c":"","ht4-breakfast":"Yes","ht4-breakfast-c":"","ht4-room":"","ht4-room-c":"","ht4-guests":"","ht4-guests-c":"","ht4-ref":"5769319323. Pin 2742","ht4-ref-c":"","ht4-booked":"","ht4-booked-c":"","ht4-notes":"","ht4-notes-c":"","ht5-name":"Chroma Lodge Rafina","ht5-name-c":"","ht5-location":"Rafina, Athens","ht5-location-c":"","ht5-checkin":"2026-06-01","ht5-checkin-c":"","ht5-checkout":"2026-06-02","ht5-checkout-c":"","ht5-nights":"","ht5-nights-c":"","ht5-breakfast":"No","ht5-breakfast-c":"","ht5-room":"","ht5-room-c":"","ht5-guests":"","ht5-guests-c":"","ht5-ref":"6756848906. Pin 5248","ht5-ref-c":"","ht5-booked":"","ht5-booked-c":"","ht5-notes":"","ht5-notes-c":""};
+
+// ═══════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════
+var STORE_KEY = 'greece2026_v2';
+function storeSave(k,v){ try{localStorage.setItem(k,v);}catch(e){} }
+function storeLoad(k){ try{var v=localStorage.getItem(k);if(v!==null)return v;}catch(e){} return null; }
+function storeRemove(k){ try{localStorage.removeItem(k);}catch(e){} }
+
+// ═══════════════════════════════════════
+// TAB NAVIGATION
+// ═══════════════════════════════════════
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-pane').forEach(function(p){ p.classList.remove('active'); p.style.display='none'; });
+  document.querySelectorAll('.tab-bar button').forEach(function(b){ b.classList.remove('active'); });
+  var pane = document.getElementById('tab-'+name);
+  if(pane){ pane.classList.add('active'); pane.style.display='block'; }
+  if(btn){ btn.classList.add('active'); }
+  if(name==='summary'){ buildSummary(); }
+}
+
+// ═══════════════════════════════════════
+// FIELD DEFINITIONS
+// ═══════════════════════════════════════
+var ferryFields = [
+  {id:'date',label:'Date',type:'date'},{id:'dep-time',label:'Departure Time',type:'time'},
+  {id:'port-from',label:'Port of Departure',ph:'e.g. Piraeus, Athens'},{id:'port-to',label:'Port of Arrival',ph:'e.g. Heraklion, Crete'},
+  {id:'arr-time',label:'Arrival Time (approx)',type:'time'},{id:'company',label:'Ferry Company',ph:'e.g. Minoan Lines'},
+  {id:'vessel',label:'Vessel Name',ph:'e.g. Knossos Palace'},{id:'ticket-type',label:'Ticket Type / Cabin',ph:'e.g. Deck passage / Cabin for 3'},
+  {id:'ref',label:'Booking Reference',ph:'e.g. FER2026-001'},{id:'booked',label:'Booked With',ph:'e.g. Ferryhopper / Direct'},
+  {id:'notes',label:'Notes',ph:'Any additional notes…',area:true}
+];
+var hotelFields = [
+  {id:'name',label:'Hotel Name',ph:'e.g. Hotel Electra, Athens'},{id:'location',label:'Location / Town',ph:'e.g. Plaka, Athens'},
+  {id:'checkin',label:'Check-in Date',type:'date'},{id:'checkout',label:'Check-out Date',type:'date'},
+  {id:'nights',label:'Number of Nights',ph:'e.g. 2'},{id:'breakfast',label:'Breakfast Included',select:['— Select —','Yes','No']},
+  {id:'room',label:'Room Type',ph:'e.g. Triple room / Sea view'},{id:'guests',label:'Number of Guests',ph:'e.g. 3'},
+  {id:'ref',label:'Booking Reference',ph:'e.g. HTL2026-001'},{id:'booked',label:'Booked With',ph:'e.g. Booking.com / Hotel Direct'},
+  {id:'notes',label:'Notes',ph:'Any additional notes…',area:true}
+];
+var flightFields = [
+  {id:'dep-date',label:'Departure Date',type:'date'},{id:'dep-apt',label:'Departure Airport',ph:'e.g. Athens Domestic'},
+  {id:'dep-term',label:'Departure Terminal',ph:'e.g. Terminal A'},{id:'dep-time',label:'Departure Time',type:'time'},
+  {id:'flt-no',label:'Flight Number',ph:'e.g. A3 332'},{id:'airline',label:'Airline',ph:'e.g. Aegean Airlines'},
+  {id:'arr-apt',label:'Arrival Airport',ph:'e.g. Santorini (JTR)'},{id:'arr-time',label:'Arrival Time',type:'time'},
+  {id:'ref',label:'Booking Reference',ph:'e.g. FL2026-001'},{id:'bookedwith',label:'Booked With',ph:'e.g. Aegean / Skyscanner'},
+  {id:'seats',label:'Seat Numbers',ph:'e.g. 12A, 12B'},{id:'notes',label:'Notes',ph:'Any additional notes…',area:true}
+];
+
+var ferryCount=0, hotelCount=0, extraFlightCount=0;
+
+function makeInput(field, prefix) {
+  var id = prefix+'-'+field.id;
+  if(field.select){ var opts=field.select.map(function(o){return '<option>'+o+'</option>';}).join(''); return '<select id="'+id+'" style="width:100%;border:none;background:transparent;font-family:Montserrat,sans-serif;font-size:0.82rem;color:#0a2a45;padding:12px 14px;outline:none;cursor:pointer;">'+opts+'</select>'; }
+  if(field.area) return '<textarea id="'+id+'" placeholder="'+(field.ph||'')+'"></textarea>';
+  if(field.type) return '<input type="'+field.type+'" id="'+id+'">';
+  return '<input id="'+id+'" placeholder="'+(field.ph||'')+'">';
+}
+
+function addFerry() {
+  ferryCount++;
+  var n=ferryCount, tbody=document.getElementById('ferry-rows');
+  var hrow=document.createElement('tr'); hrow.style.background='#e0f5f5';
+  hrow.innerHTML='<td colspan="4" style="padding:10px 16px;font-weight:700;font-size:0.78rem;letter-spacing:1px;color:#0d6e6e;text-transform:uppercase;">⛴ Ferry '+n+'</td>';
+  tbody.appendChild(hrow);
+  ferryFields.forEach(function(f){ var row=document.createElement('tr'); row.innerHTML='<td style="padding:12px 14px;"></td><td class="label-cell">'+f.label+'</td><td>'+makeInput(f,'fy'+n)+'</td><td class="comment-cell"><input id="fy'+n+'-'+f.id+'-c" placeholder="Comment…"></td>'; tbody.appendChild(row); });
+  document.getElementById('ferry-header-text').innerHTML='<span class="icon">⛴️</span>Ferry Crossings ('+n+')';
+}
+
+function addHotel() {
+  hotelCount++;
+  var n=hotelCount, tbody=document.getElementById('hotel-rows');
+  var hrow=document.createElement('tr'); hrow.style.background='#fff3cd';
+  hrow.innerHTML='<td colspan="4" style="padding:10px 16px;font-weight:700;font-size:0.78rem;letter-spacing:1px;color:#8b6914;text-transform:uppercase;">🏨 Hotel '+n+'</td>';
+  tbody.appendChild(hrow);
+  hotelFields.forEach(function(f){ var row=document.createElement('tr'); row.innerHTML='<td style="padding:12px 14px;"></td><td class="label-cell">'+f.label+'</td><td>'+makeInput(f,'ht'+n)+'</td><td class="comment-cell"><input id="ht'+n+'-'+f.id+'-c" placeholder="Comment…"></td>'; tbody.appendChild(row); });
+  document.getElementById('hotel-header-text').innerHTML='<span class="icon">🏨</span>Hotel Accommodation ('+n+')';
+}
+
+function addExtraFlight() {
+  extraFlightCount++;
+  var n=extraFlightCount, container=document.getElementById('extra-flights-container');
+  var wrap=document.createElement('div'); wrap.className='section extra-flight';
+  var rows=flightFields.map(function(f){ return '<tr><td class="label-cell">'+f.label+'</td><td>'+makeInput(f,'xf'+n)+'</td><td class="comment-cell"><input id="xf'+n+'-'+f.id+'-c" placeholder="Comment…"></td></tr>'; }).join('');
+  wrap.innerHTML='<div class="section-header"><div class="left"><span class="icon">✈️</span>Additional Flight '+n+'</div></div><div class="table-wrap"><table><thead><tr><th>Field</th><th>Details</th><th>Comments</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  container.appendChild(wrap);
+}
+
+// ═══════════════════════════════════════
+// APPLY DATA TO FORM
+// ═══════════════════════════════════════
+function applyData(data) {
+  while(ferryCount<(data._ferryCount||0)){ addFerry(); }
+  while(hotelCount<(data._hotelCount||0)){ addHotel(); }
+  while(extraFlightCount<(data._extraFlightCount||0)){ addExtraFlight(); }
+  Object.keys(data).forEach(function(k){
+    if(k.charAt(0)==='_') return;
+    var el=document.getElementById(k);
+    if(el){ el.value=data[k]; }
+  });
+}
+
+function getAllInputs() {
+  var data={_ferryCount:ferryCount,_hotelCount:hotelCount,_extraFlightCount:extraFlightCount};
+  document.querySelectorAll('input,textarea,select').forEach(function(el){ if(el.id){ data[el.id]=el.value; } });
+  return data;
+}
+
+// ═══════════════════════════════════════
+// AUTO-SAVE
+// ═══════════════════════════════════════
+var autosaveTimer=null, lastSavedJSON='';
+
+function setStatus(state,msg,time){
+  var dot=document.getElementById('autosave-dot'), txt=document.getElementById('autosave-msg'), tim=document.getElementById('autosave-time');
+  if(dot) dot.className=state; if(txt) txt.textContent=msg; if(tim) tim.textContent=time||'';
+}
+
+function doAutoSave(){
+  try{
+    var data=getAllInputs(), json=JSON.stringify(data);
+    if(json===lastSavedJSON) return;
+    setStatus('saving','Saving…','');
+    storeSave(STORE_KEY,json); storeSave(STORE_KEY+'_time',new Date().toISOString());
+    lastSavedJSON=json;
+    var now=new Date(), t=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0')+':'+now.getSeconds().toString().padStart(2,'0');
+    setStatus('saved','Auto-saved',t);
+  }catch(e){ setStatus('error','Auto-save failed',''); }
+}
+
+function scheduleAutoSave(){ clearTimeout(autosaveTimer); autosaveTimer=setTimeout(doAutoSave,1500); }
+
+// ═══════════════════════════════════════
+// SAVE / EXPORT / CLEAR
+// ═══════════════════════════════════════
+function saveData(){
+  try{
+    var blob=new Blob([JSON.stringify(getAllInputs(),null,2)],{type:'application/json'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='greece-2026-itinerary.json'; a.click();
+    showToast('💾 Saved to Downloads folder.');
+  }catch(e){ showToast('⚠️ Could not save: '+e.message); }
+}
+
+function exportWithData(){
+  try{
+    var data=getAllInputs(), dataStr=JSON.stringify(data);
+    var html='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
+    // Update the BAKED_DATA in the exported copy with current data
+    html=html.replace(/var BAKED_DATA = \{[^;]*\};/, 'var BAKED_DATA = '+dataStr+';');
+    // Remove any old autoloader blocks
+    html=html.replace(/<!--SAVEDDATA-->[\s\S]*?<!--\/SAVEDDATA-->/g,'');
+    var blob=new Blob([html],{type:'text/html;charset=utf-8'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='greece-2026-shared.html'; a.click();
+    showToast('📤 Exported! Share greece-2026-shared.html.');
+  }catch(e){ showToast('⚠️ Export failed: '+e.message); }
+}
+
+function clearAll(){
+  if(!confirm('Clear all data? This cannot be undone.')) return;
+  document.querySelectorAll('input,textarea').forEach(function(el){ el.value=''; });
+  document.querySelectorAll('select').forEach(function(el){ el.selectedIndex=0; });
+  storeRemove(STORE_KEY); storeRemove(STORE_KEY+'_time');
+  lastSavedJSON=''; setStatus('','Cleared','');
+  showToast('🗑 All fields cleared.');
+}
+
+// ═══════════════════════════════════════
+// SUMMARY
+// ═══════════════════════════════════════
+function fmtDate(d){ if(!d) return ''; var p=d.split('-'); if(p.length!==3) return d; var m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; return p[2]+' '+m[parseInt(p[1],10)-1]+' '+p[0]; }
+function gv(id){ var el=document.getElementById(id); return el?el.value.trim():''; }
+function hasData(id){ var v=gv(id); return v!==''&&v!=='— Select —'; }
+function sortKey(date,time){ return (date||'0000-01-01')+'|'+(time||'ZZ:ZZ'); }
+
+function buildSummary(){
+  var rows=[];
+  if(hasData('of-dep-date')||hasData('of-dep-time')||hasData('of-flt-no')||hasData('of-arr-apt')){
+    var od=gv('of-dep-date'),ot=gv('of-dep-time');
+    rows.push({s:sortKey(od,ot),date:od?fmtDate(od):'TBC',time:ot||'—',type:'flight',desc:'✈️ <b>'+(gv('of-flt-no')||'Flight TBC')+'</b> &nbsp;'+(gv('of-dep-apt')||'LHR')+' → '+(gv('of-arr-apt')||'ATH')+(gv('of-arr-time')?' (arr. '+gv('of-arr-time')+')':''),ref:gv('of-ref')||'—',booked:gv('of-bookedwith'),notes:gv('of-notes')});
+  }
+  if(hasData('rf-dep-date')||hasData('rf-dep-time')||hasData('rf-flt-no')||hasData('rf-arr-apt')){
+    var rd=gv('rf-dep-date'),rt=gv('rf-dep-time');
+    rows.push({s:sortKey(rd||'9999-12-30',rt),date:rd?fmtDate(rd):'TBC',time:rt||'—',type:'flight',desc:'✈️ <b>'+(gv('rf-flt-no')||'Flight TBC')+'</b> &nbsp;'+(gv('rf-dep-apt')||'ATH')+' → '+(gv('rf-arr-apt')||'LHR')+(gv('rf-arr-time')?' (arr. '+gv('rf-arr-time')+')':''),ref:gv('rf-ref')||'—',booked:gv('rf-bookedwith'),notes:gv('rf-notes')});
+  }
+  for(var xn=1;xn<=extraFlightCount;xn++){
+    if(hasData('xf'+xn+'-flt-no')||hasData('xf'+xn+'-dep-apt')||hasData('xf'+xn+'-dep-date')){
+      var xd=gv('xf'+xn+'-dep-date'),xt=gv('xf'+xn+'-dep-time');
+      rows.push({s:sortKey(xd,xt),date:xd?fmtDate(xd):'TBC',time:xt||'—',type:'flight',desc:'✈️ <b>'+(gv('xf'+xn+'-flt-no')||'Flight TBC')+'</b> &nbsp;'+(gv('xf'+xn+'-dep-apt')||'?')+' → '+(gv('xf'+xn+'-arr-apt')||'?'),ref:gv('xf'+xn+'-ref')||'—',booked:gv('xf'+xn+'-bookedwith'),notes:gv('xf'+xn+'-notes')});
+    }
+  }
+  for(var fn=1;fn<=ferryCount;fn++){
+    if(hasData('fy'+fn+'-date')||hasData('fy'+fn+'-port-from')||hasData('fy'+fn+'-company')){
+      var fd=gv('fy'+fn+'-date'),ft=gv('fy'+fn+'-dep-time');
+      rows.push({s:sortKey(fd,ft),date:fd?fmtDate(fd):'TBC',time:ft||'—',type:'ferry',desc:'⛴️ <b>'+(gv('fy'+fn+'-company')||'Ferry TBC')+'</b> &nbsp;'+(gv('fy'+fn+'-port-from')||'?')+' → '+(gv('fy'+fn+'-port-to')||'?')+(gv('fy'+fn+'-vessel')?' ('+gv('fy'+fn+'-vessel')+')':''),ref:gv('fy'+fn+'-ref')||'—',booked:gv('fy'+fn+'-booked'),notes:gv('fy'+fn+'-notes')});
+    }
+  }
+  for(var hn=1;hn<=hotelCount;hn++){
+    if(hasData('ht'+hn+'-name')||hasData('ht'+hn+'-checkin')){
+      var hd=gv('ht'+hn+'-checkin'),hout=gv('ht'+hn+'-checkout'),bkfst=gv('ht'+hn+'-breakfast');
+      if(!bkfst||bkfst==='— Select —') bkfst='?';
+      rows.push({s:sortKey(hd,null),date:hd?fmtDate(hd):'TBC',time:'—',type:'hotel',desc:'🏨 <b>'+(gv('ht'+hn+'-name')||'Hotel TBC')+'</b>'+(gv('ht'+hn+'-location')?' — '+gv('ht'+hn+'-location'):'')+' | Check-out: '+(hout?fmtDate(hout):'TBC')+' | '+(gv('ht'+hn+'-nights')||'?')+' nights | Breakfast: '+bkfst,ref:gv('ht'+hn+'-ref')||'—',booked:gv('ht'+hn+'-booked'),notes:gv('ht'+hn+'-notes')});
+    }
+  }
+  rows.sort(function(a,b){ return a.s<b.s?-1:a.s>b.s?1:0; });
+  var tbody=document.getElementById('summary-body');
+  if(!rows.length){ tbody.innerHTML='<tr><td colspan="7" class="summary-empty">No data entered yet.</td></tr>'; return; }
+  tbody.innerHTML=rows.map(function(r,i){
+    return '<tr style="background:'+(i%2===0?'white':'#fafbfc')+'">'
+      +'<td style="font-weight:600;white-space:nowrap;">'+r.date+'</td>'
+      +'<td style="white-space:nowrap;color:#556;">'+r.time+'</td>'
+      +'<td><span class="type-badge badge-'+r.type+'">'+r.type+'</span></td>'
+      +'<td>'+r.desc+'</td>'
+      +'<td style="font-family:monospace;font-size:0.78rem;color:#1a6fa8;">'+r.ref+'</td>'
+      +'<td style="font-size:0.78rem;color:#556;">'+(r.booked||'')+'</td>'
+      +'<td style="color:#7a6a3a;font-style:italic;font-size:0.78rem;">'+(r.notes||'')+'</td>'
+      +'</tr>';
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+function showToast(msg){
+  var t=document.getElementById('toast');
+  if(!t){ t=document.createElement('div'); t.id='toast'; t.style.cssText='position:fixed;bottom:50px;left:50%;transform:translateX(-50%);background:#0a2a45;color:white;padding:12px 24px;border-radius:8px;font-family:Montserrat,sans-serif;font-size:0.82rem;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.3);transition:opacity 0.4s;pointer-events:none;max-width:90vw;text-align:center;'; document.body.appendChild(t); }
+  t.textContent=msg; t.style.opacity='1';
+  setTimeout(function(){ t.style.opacity='0'; },3500);
+}
+
+// ═══════════════════════════════════════
+// INIT — load baked data first, then
+// check if localStorage has newer data
+// ═══════════════════════════════════════
+window.addEventListener('load', function(){
+  // First apply the baked-in data
+  applyData(BAKED_DATA);
+  setStatus('saved','Your data loaded','');
+
+  // Then check if localStorage has something newer
+  try {
+    var stored = storeLoad(STORE_KEY);
+    var storedTime = storeLoad(STORE_KEY+'_time');
+    if(stored){
+      var storedDate = storedTime ? new Date(storedTime) : null;
+      var msg = storedDate ? 'Newer auto-save found from '+storedDate.toLocaleString() : 'Auto-save found';
+      if(confirm(msg+'\n\nLoad it? (Click Cancel to keep the current data)')){
+        applyData(JSON.parse(stored));
+        setStatus('saved','Restored from auto-save',storedDate?storedDate.toLocaleString():'');
+        showToast('✅ Auto-save restored.');
+      }
+    }
+  } catch(e){}
+
+  // Start auto-saving on every change
+  document.addEventListener('input', scheduleAutoSave);
+  document.addEventListener('change', scheduleAutoSave);
+});
+</script>
+
+
+<div id="toast" style="position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); background: rgb(10, 42, 69); color: white; padding: 12px 24px; border-radius: 8px; font-family: Montserrat, sans-serif; font-size: 0.82rem; z-index: 9999; box-shadow: rgba(0, 0, 0, 0.3) 0px 4px 20px; transition: opacity 0.4s; pointer-events: none; max-width: 90vw; text-align: center; opacity: 0;">✅ Auto-save restored.</div></body></html>
