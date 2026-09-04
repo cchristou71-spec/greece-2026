@@ -174,8 +174,6 @@
   #summary-table tbody tr { border-bottom:1px solid #eef1f5; }
   #summary-table tbody tr:hover { background:#e8f4fd !important; }
   #summary-table td { padding:8px 6px; vertical-align:middle; overflow:hidden; }
-  #summary-table col.col-day   { width:26px; }
-  #summary-table col.col-weekday { width:40px; }
   #summary-table col.col-date  { width:46px; }
   #summary-table col.col-time  { width:36px; }
   #summary-table col.col-desc  { }
@@ -398,21 +396,6 @@
     <div class="setup-section">
       <label class="setup-label">Trip Name</label>
       <input class="setup-input" id="setup-trip-name" placeholder="e.g. Summer Road Trip 2027" maxlength="50">
-    </div>
-
-    <div class="setup-section">
-      <label class="setup-label">Trip Dates</label>
-      <div style="display:flex;gap:10px;">
-        <div style="flex:1;">
-          <div style="font-size:0.68rem;color:#888;margin-bottom:3px;">First day</div>
-          <input class="setup-input" type="date" id="setup-trip-start">
-        </div>
-        <div style="flex:1;">
-          <div style="font-size:0.68rem;color:#888;margin-bottom:3px;">Last day</div>
-          <input class="setup-input" type="date" id="setup-trip-end">
-        </div>
-      </div>
-      <p style="font-size:0.66rem;color:#999;margin-top:6px;">Automatically added to the shared Calendar app as one entry spanning these dates.</p>
     </div>
 
     <div class="setup-section">
@@ -787,19 +770,16 @@
     <div style="margin:0 -12px;width:calc(100% + 24px);">
       <table id="summary-table">
         <colgroup>
-          <col class="col-day"><col class="col-weekday">
           <col class="col-date"><col class="col-time">
           <col class="col-desc"><col class="col-notes">
         </colgroup>
         <thead><tr>
-          <th>Day</th>
-          <th>Weekday</th>
           <th>Date</th>
           <th>Time</th>
           <th>Description</th>
           <th id="notes-col-header">Notes</th>
         </tr></thead>
-        <tbody id="summary-body"><tr><td colspan="6" class="summary-empty">Tap 🔄 to build your itinerary.</td></tr></tbody>
+        <tbody id="summary-body"><tr><td colspan="4" class="summary-empty">Tap 🔄 to build your itinerary.</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -895,120 +875,6 @@ function apiHeaders(extra) {
   var h = { 'Content-Type':'application/json', 'apikey':SUPABASE_KEY, 'Authorization':'Bearer '+SUPABASE_KEY };
   if (extra) { Object.keys(extra).forEach(function(k){ h[k]=extra[k]; }); }
   return h;
-}
-
-// ═══════════════════════════════════════
-// CALENDAR SYNC — trip-level only. One entry per trip, spanning First Day
-// to Last Day exactly like a manually-created multi-day Calendar entry
-// (same "arrow between dates" behaviour). Both apps share this Supabase
-// project, so we write straight into the calendar app's own
-// calendar_events table using its exact event schema — no changes needed
-// on the calendar side. One-way: Travel → Calendar. Re-saving trip setup
-// updates the same calendar entry (by stored id) rather than duplicating it.
-// ═══════════════════════════════════════
-var CAL_API = SUPABASE_URL + '/rest/v1/calendar_events';
-var CAL_ROW_ID = 'shared';
-
-function calParseDate(s) {
-  if (!s) return null;
-  var p = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!p) return null;
-  return { year:parseInt(p[1]), month:parseInt(p[2])-1, day:parseInt(p[3]) };
-}
-
-function calGenerateId() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
-
-function calRemoveById(dayMap, id) {
-  var out = {};
-  for (var k in dayMap) {
-    if (!dayMap.hasOwnProperty(k)) continue;
-    var filtered = dayMap[k].filter(function(e){ return e.id !== id; });
-    if (filtered.length) out[k] = filtered;
-  }
-  return out;
-}
-
-function calFindById(dayMap, id) {
-  for (var k in dayMap) {
-    if (!dayMap.hasOwnProperty(k)) continue;
-    var found = dayMap[k].find(function(e){ return e.id === id; });
-    if (found) return found;
-  }
-  return null;
-}
-
-// Creates/updates/removes the one calendar entry for this trip, based on
-// cfg.tripStartDate / cfg.tripEndDate. Calls onDone(newCalEventId) when
-// finished so the caller can persist the id back into the trip's config.
-function syncTripSpanToCalendar(cfg, onDone) {
-  var startDate = calParseDate(cfg.tripStartDate);
-  var endDate = calParseDate(cfg.tripEndDate);
-  var existingId = cfg.calEventId || '';
-
-  // No dates set — if there was a previously-synced entry, remove it; otherwise no-op.
-  if (!startDate) {
-    if (existingId) {
-      fetch(CAL_API + '?id=eq.' + CAL_ROW_ID + '&select=data', { headers: apiHeaders() })
-        .then(function(r){ return r.json(); })
-        .then(function(rows){
-          var data = (rows && rows[0] && rows[0].data) ? rows[0].data : {};
-          data = calRemoveById(data, existingId);
-          return fetch(CAL_API + '?id=eq.' + CAL_ROW_ID, { method:'PATCH', headers: apiHeaders({'Prefer':'return=minimal'}), body: JSON.stringify({data:data}) });
-        })
-        .then(function(){ if (onDone) onDone(''); })
-        .catch(function(){ if (onDone) onDone(existingId); });
-    } else if (onDone) onDone('');
-    return;
-  }
-  if (endDate && endDate.year===startDate.year && endDate.month===startDate.month && endDate.day===startDate.day) endDate = null;
-
-  var title = '✈️ ' + (cfg.tripName || 'Trip');
-
-  fetch(CAL_API + '?id=eq.' + CAL_ROW_ID + '&select=data', { headers: apiHeaders() })
-    .then(function(r){ return r.json(); })
-    .then(function(rows){
-      var data = (rows && rows[0] && rows[0].data) ? rows[0].data : {};
-      var eventId = existingId;
-      var preservedNote = '';
-
-      if (existingId) {
-        var existing = calFindById(data, existingId);
-        if (existing) { preservedNote = existing.note || ''; data = calRemoveById(data, existingId); }
-        else existingId = ''; // stale link (event deleted in calendar) — create fresh
-      }
-      if (!eventId) eventId = calGenerateId();
-
-      var entry = {
-        id: eventId,
-        title: title,
-        timeStart: '',
-        timeEnd: '',
-        note: preservedNote,
-        colour: '#222222',
-        eventType: 'holiday',
-        date: startDate,
-        travelLink: { tripId: cfg.id }
-      };
-      if (endDate) { entry.endDay = endDate.day; entry.endMonth = endDate.month; entry.endYear = endDate.year; }
-
-      var key = startDate.year + '-' + startDate.month + '-' + startDate.day;
-      var arr = data[key] ? data[key].slice() : [];
-      arr.push(entry);
-      data[key] = arr;
-
-      return fetch(CAL_API + '?id=eq.' + CAL_ROW_ID, {
-        method: 'PATCH',
-        headers: apiHeaders({ 'Prefer':'return=minimal' }),
-        body: JSON.stringify({ data: data })
-      }).then(function(res){
-        if (!res.ok) throw new Error('Calendar save failed: ' + res.status);
-        if (onDone) onDone(eventId);
-      });
-    })
-    .catch(function(e){
-      showToast('⚠️ Calendar sync failed: ' + e.message);
-      if (onDone) onDone(existingId);
-    });
 }
 
 // ═══════════════════════════════════════
@@ -2351,51 +2217,6 @@ function gv(id){ var el=document.getElementById(id); return el?el.value.trim():'
 function hasData(id){ var v=gv(id); return v!==''&&v!=='— Select —'; }
 function sortKey(date,time){ return (date||'0000-01-01')+'|'+(time||'ZZ:ZZ'); }
 
-// ── Day-by-day itinerary helpers ──
-function isoToUTCDate(iso){ var p=iso.split('-'); return new Date(Date.UTC(parseInt(p[0],10),parseInt(p[1],10)-1,parseInt(p[2],10))); }
-function addDaysISO(iso,n){ var d=isoToUTCDate(iso); d.setUTCDate(d.getUTCDate()+n); return d.toISOString().slice(0,10); }
-function weekdayName(iso){ return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][isoToUTCDate(iso).getUTCDay()]; }
-function isoMin(a,b){ if(!a) return b; if(!b) return a; return a<b?a:b; }
-function isoMax(a,b){ if(!a) return b; if(!b) return a; return a>b?a:b; }
-
-// Builds a lookup of ISO date -> {icon,label,tab,anchor} for whichever
-// hotel stay or cruise leg covers that date, used to fill "no booking
-// that day" rows with useful context (Where am I staying / which ship).
-function buildDayContext(){
-  var ctx = {};
-  for(var hn=1;hn<=hotelCount;hn++){
-    var checkin = gv('ht'+hn+'-checkin');
-    if(!checkin) continue;
-    var checkout = gv('ht'+hn+'-checkout') || checkin;
-    var name = gv('ht'+hn+'-name') || 'Hotel';
-    var loc = gv('ht'+hn+'-location');
-    var label = name + (loc ? ' — ' + loc : '');
-    var lastDay = checkout > checkin ? checkout : checkin;
-    var d = checkin;
-    var guard = 0;
-    while(d <= lastDay && guard < 400){
-      ctx[d] = {icon:'🏨', label:label, tab:'hotels', anchor:'ht'+hn+'-name'};
-      d = addDaysISO(d,1); guard++;
-    }
-  }
-  for(var crn=1;crn<=cruiseCount;crn++){
-    var depDate = gv('cr'+crn+'-dep-date'), arrDate = gv('cr'+crn+'-arr-date');
-    if(!depDate) continue;
-    var crLabel = gv('cr'+crn+'-name')||gv('cr'+crn+'-line')||gv('cr'+crn+'-ship')||('Cruise '+crn);
-    var crDaysData = (getAllInputs()._cruiseDays && getAllInputs()._cruiseDays[crn]) || [];
-    var byDate = {};
-    crDaysData.forEach(function(day){ if(day.date) byDate[day.date] = day.location; });
-    var endD = arrDate || depDate;
-    var d = depDate, guard = 0;
-    while(d <= endD && guard < 400){
-      var port = byDate[d];
-      ctx[d] = {icon:'🚢', label: crLabel + (port ? ' — ' + port : ' — at sea'), tab:'cruises', anchor:'cr'+crn+'-dep-date'};
-      d = addDaysISO(d,1); guard++;
-    }
-  }
-  return ctx;
-}
-
 var currentEntryTab = null;
 var currentEntryAnchor = null;
 var currentPanelRow = null;
@@ -2755,70 +2576,20 @@ function buildSummary(){
   }
 
   rows.sort(function(a,b){ return a.s<b.s?-1:a.s>b.s?1:0; });
-  rows.forEach(function(r){ r.key = r.tab+'::'+r.anchor; r.done = isEventCompleted(r.key); r.isFiller = false; });
-
-  // Split into rows with a real date vs "TBC" (no date yet) items —
-  // only dated rows can be placed into the day-by-day sequence.
-  var datedRows = rows.filter(function(r){ return r.s.slice(0,10) !== '0000-01-01'; });
-  var undatedRows = rows.filter(function(r){ return r.s.slice(0,10) === '0000-01-01'; });
-
-  // Day 1 = the trip's First Day (Setup), or the earliest booked item if
-  // that's earlier / not set. Range extends to cover every booked item.
-  var itemDates = datedRows.map(function(r){ return r.s.slice(0,10); });
-  var earliestItem = itemDates.length ? itemDates.reduce(isoMin) : null;
-  var latestItem = itemDates.length ? itemDates.reduce(isoMax) : null;
-  var cfgStart = (tripConfig && tripConfig.tripStartDate) || null;
-  var cfgEnd = (tripConfig && tripConfig.tripEndDate) || null;
-  var effStart = isoMin(cfgStart, earliestItem);
-  var effEnd = isoMax(cfgEnd, latestItem);
-
-  var dayContext = buildDayContext();
-  var expanded = [];
-  if (effStart && effEnd && effStart <= effEnd) {
-    var d = effStart, dayNum = 1, guard = 0;
-    while (d <= effEnd && guard < 500) {
-      (function(dayIso){
-        var itemsForDay = datedRows.filter(function(r){ return r.s.slice(0,10) === dayIso; });
-        var wd = weekdayName(dayIso);
-        if (itemsForDay.length) {
-          itemsForDay.forEach(function(r, idx){ r.dayNum = idx===0 ? dayNum : null; r.weekday = idx===0 ? wd : null; expanded.push(r); });
-        } else {
-          var ctx = dayContext[dayIso];
-          var fillerKey = ctx ? (ctx.tab+'::'+ctx.anchor) : ('filler::'+dayIso);
-          expanded.push({
-            s: dayIso+'|00:00', date: fmtDate(dayIso), time:'—',
-            desc: ctx ? (ctx.icon+' <b>'+ctx.label+'</b>') : '<span style="color:#bbb;">— free day —</span>',
-            plainDesc: ctx ? ctx.label : 'Free day',
-            type: ctx ? (ctx.tab==='hotels'?'hotel':'cruise') : 'day',
-            notes:'', tab: ctx?ctx.tab:'', anchor: ctx?ctx.anchor:'',
-            dayNum: dayNum, weekday: wd, isFiller:true, key:fillerKey, done:isEventCompleted(fillerKey)
-          });
-        }
-      })(d);
-      d = addDaysISO(d,1);
-      dayNum++;
-      guard++;
-    }
-  }
-  undatedRows.forEach(function(r){ r.dayNum=null; r.weekday=null; expanded.push(r); });
-
-  window.rowData = expanded;
+  rows.forEach(function(r){ r.key = r.tab+'::'+r.anchor; r.done = isEventCompleted(r.key); });
+  window.rowData = rows;
   var tbody=document.getElementById('summary-body');
-  var visibleRows = showCompleted ? expanded : expanded.filter(function(r){ return !r.done; });
-  var hiddenCount = expanded.length - visibleRows.length;
-  if(!expanded.length){ tbody.innerHTML='<tr><td colspan="6" class="summary-empty">No data entered yet.</td></tr>'; return; }
-  if(!visibleRows.length){ tbody.innerHTML='<tr><td colspan="6" class="summary-empty">All events marked as done. Tap ✅ Show Done to view them.</td></tr>'; return; }
+  var visibleRows = showCompleted ? rows : rows.filter(function(r){ return !r.done; });
+  var hiddenCount = rows.length - visibleRows.length;
+  if(!rows.length){ tbody.innerHTML='<tr><td colspan="4" class="summary-empty">No data entered yet.</td></tr>'; return; }
+  if(!visibleRows.length){ tbody.innerHTML='<tr><td colspan="4" class="summary-empty">All events marked as done. Tap ✅ Show Done to view them.</td></tr>'; return; }
   tbody.innerHTML=visibleRows.map(function(r){
-    var i = expanded.indexOf(r);
+    var i = rows.indexOf(r);
     var shortDate = r.date.replace(/\s\d{4}$/,'');
     var doneStyle = r.done ? 'opacity:0.45;text-decoration:line-through;' : '';
-    var clickable = !!r.tab;
-    var fillerStyle = r.isFiller ? 'background:#fbfbfa !important;' : '';
-    return '<tr style="background:'+(i%2===0?'white':'#fafbfc')+';'+fillerStyle+(clickable?'cursor:pointer;':'')+doneStyle+'" '
-      +(clickable ? ('onclick="navigateToEntry(\''+r.tab+'\',\''+r.anchor+'\',rowData['+i+'])" title="Tap to view full details"') : '')
-      +'>'
-      +'<td style="font-weight:700;color:var(--navy);font-size:0.68rem;text-align:center;">'+(r.dayNum!=null?r.dayNum:'')+'</td>'
-      +'<td style="font-size:0.64rem;color:#778;white-space:nowrap;">'+(r.weekday?r.weekday.slice(0,3):'')+'</td>'
+    return '<tr style="background:'+(i%2===0?'white':'#fafbfc')+';cursor:pointer;'+doneStyle+'" '
+      +'onclick="navigateToEntry(\''+r.tab+'\',\''+r.anchor+'\',rowData['+i+'])" '
+      +'title="Tap to view full details">'
       +'<td style="font-weight:600;white-space:nowrap;font-size:0.68rem;">'+shortDate+'</td>'
       +'<td style="white-space:nowrap;color:#556;font-size:0.68rem;">'+r.time+'</td>'
       +'<td style="font-size:0.75rem;line-height:1.3;">'+r.desc+'</td>'
@@ -2826,7 +2597,7 @@ function buildSummary(){
       +'</tr>';
   }).join('');
   if (hiddenCount > 0 && !showCompleted) {
-    tbody.innerHTML += '<tr><td colspan="6" style="text-align:center;color:#aaa;font-style:italic;font-size:0.7rem;padding:10px;">'+hiddenCount+' completed event'+(hiddenCount===1?'':'s')+' hidden — tap ✅ Show Done to view</td></tr>';
+    tbody.innerHTML += '<tr><td colspan="4" style="text-align:center;color:#aaa;font-style:italic;font-size:0.7rem;padding:10px;">'+hiddenCount+' completed event'+(hiddenCount===1?'':'s')+' hidden — tap ✅ Show Done to view</td></tr>';
   }
   if (!notesVisible) {
     document.querySelectorAll('.summary-notes-cell').forEach(function(el){ el.style.display='none'; });
@@ -3005,7 +2776,7 @@ function openTripList() {
   var isOriginalOwner = isOriginalGreeceOwner();
   var hasGreece = trips.some(function(t){ return t.id === 'greece2026'; });
   var restoreBtn = '';
-  var fixBtn = '';
+  var fixBtn = (hasGreece && isOriginalOwner) ? '<button onclick="restoreUKBakedData()" style="width:100%;padding:10px;background:#fee2e2;color:#c0392b;border:2px solid #f5b5b5;border-radius:10px;font-family:Montserrat,sans-serif;font-weight:700;font-size:0.78rem;cursor:pointer;margin-bottom:12px;">🆘 Restore Greece UK data from backup</button>' : '';
 
   var defaultId = getDefaultTrip();
   if (!trips.length) {
@@ -3400,12 +3171,8 @@ function confirmDeleteTrip() {
   var box = document.getElementById('delete-trip-confirm');
   if (box) box.style.display = 'none';
   if (!id) return;
-  var trip = getTripById(id);
   var trips = getAllTrips().filter(function(t){ return t.id !== id; });
   saveAllTrips(trips);
-  if (trip && trip.calEventId) {
-    syncTripSpanToCalendar({ id:id, tripName:trip.tripName, tripStartDate:'', tripEndDate:'', calEventId:trip.calEventId }, function(){});
-  }
   if (getActiveTrip() === id) {
     setActiveTrip(trips.length ? trips[0].id : null);
   }
@@ -3426,13 +3193,9 @@ function startNewTrip() {
   setupIsEdit = false;
   tripConfig = null; // ensure no leftover config bleeds into a "new" form
   var nameEl = document.getElementById('setup-trip-name');
-  var startEl = document.getElementById('setup-trip-start');
-  var endEl = document.getElementById('setup-trip-end');
   var g1El = document.getElementById('setup-g1-name');
   var g2El = document.getElementById('setup-g2-name');
   if (nameEl) nameEl.value = '';
-  if (startEl) startEl.value = '';
-  if (endEl) endEl.value = '';
   if (g1El) g1El.value = '';
   if (g2El) g2El.value = '';
   g1Flag = '🇬🇧'; g2Flag = '🇺🇸';
@@ -3599,8 +3362,6 @@ function openSetup(isEdit) {
   setupIsEdit = isEdit;
   var cfg = isEdit ? (tripConfig || {}) : {};
   document.getElementById('setup-trip-name').value = cfg.tripName || '';
-  document.getElementById('setup-trip-start').value = cfg.tripStartDate || '';
-  document.getElementById('setup-trip-end').value = cfg.tripEndDate || '';
   document.getElementById('setup-g1-name').value = cfg.g1Name || '';
   document.getElementById('setup-g2-name').value = cfg.g2Name || '';
   setGroupCount(cfg.groupCount || 2);
@@ -3673,14 +3434,10 @@ function saveSetup() {
 
   var isEdit = setupIsEdit && tripConfig && tripConfig.id;
   var tripId = isEdit ? tripConfig.id : generateTripId(name);
-  var previousCalEventId = isEdit ? (tripConfig.calEventId || '') : '';
 
   var cfg = {
     id: tripId,
     tripName: name,
-    tripStartDate: document.getElementById('setup-trip-start').value || '',
-    tripEndDate: document.getElementById('setup-trip-end').value || '',
-    calEventId: previousCalEventId,
     groupCount: setupGroupCount,
     g1Name: g1, g1Flag: g1Flag,
     g1DbId: isEdit ? (tripConfig.g1DbId||tripId+'_G1') : (tripId+'_G1'),
@@ -3728,20 +3485,7 @@ function saveSetup() {
   applyTripConfig(cfg);
   document.getElementById('setup-modal').classList.remove('show');
   showToast('✅ Trip "'+name+'" '+(isEdit?'updated':'created')+'!');
-
-  // Push the trip span into the shared Calendar app (fire-and-forget).
-  // If the id changes (first sync, or dates were cleared), persist the
-  // updated id back into the trips list before the page reloads.
-  syncTripSpanToCalendar(cfg, function(newCalEventId){
-    if (newCalEventId !== previousCalEventId) {
-      cfg.calEventId = newCalEventId;
-      var trips2 = getAllTrips().filter(function(t){ return t.id !== tripId; });
-      trips2.push(cfg);
-      saveAllTrips(trips2);
-    }
-  });
-
-  setTimeout(function(){ window.location.reload(); }, 700);
+  setTimeout(function(){ window.location.reload(); }, 500);
 }
 
 function confirmGroup(group) {
